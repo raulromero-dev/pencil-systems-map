@@ -89,7 +89,7 @@ export function render(g, ctx) {
     sections.push({ layer, members, top: y, height })
     y += height
   })
-  const H = y + 72
+  const H = y + 210      // clear air under the last circle, before the footer
 
   // the page is as tall as it needs to be, and scrolls
   svg.setAttribute('viewBox', `0 0 ${VW} ${H}`)

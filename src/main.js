@@ -7,8 +7,10 @@ import { buildGate } from './gate.js'
 import * as final3 from './directions/final3.js'
 import * as final2 from './directions/final2.js'
 import * as map2 from './directions/map2.js'
+import * as final4 from './directions/final4.js'
+import * as final5 from './directions/final5.js'
 
-const RENDERERS = { final3, final2, map2 }
+const RENDERERS = { final3, final2, map2, final4, final5 }
 
 // #dark and #light are the only hash options left
 {
@@ -78,7 +80,7 @@ addEventListener('resize', () => {
 //   /final-2   cards
 //   /map-2     one continuous stroke
 const route = location.pathname.replace(/\/+$/, '') || '/'
-const BY_ROUTE = { '/final-3': 'final3', '/final-2': 'final2', '/map-2': 'map2' }
+const BY_ROUTE = { '/final-3': 'final3', '/final-2': 'final2', '/map-2': 'map2', '/final-4': 'final4', '/final-5': 'final5' }
 if (BY_ROUTE[route]) set({ direction: BY_ROUTE[route] })
 
 const onSheet = route === '/' || route === '/sheet'

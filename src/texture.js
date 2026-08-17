@@ -79,6 +79,24 @@ export function installTextures(svgDefs) {
   pat.appendChild(im)
   svgDefs.appendChild(pat)
 
+  // Arrowheads, one per relationship strength. markerUnits is userSpaceOnUse so
+  // the head is sized by the strength of the link rather than by the width of
+  // the line it happens to sit on.
+  ;[['arw1', 7], ['arw2', 9], ['arw3', 12]].forEach(([id, size]) => {
+    const m = document.createElementNS(NS, 'marker')
+    m.setAttribute('id', id)
+    m.setAttribute('viewBox', '0 0 10 10')
+    m.setAttribute('refX', '9'); m.setAttribute('refY', '5')
+    m.setAttribute('markerWidth', size); m.setAttribute('markerHeight', size)
+    m.setAttribute('markerUnits', 'userSpaceOnUse')
+    m.setAttribute('orient', 'auto-start-reverse')
+    const p = document.createElementNS(NS, 'path')
+    p.setAttribute('d', 'M0.5,1.6 L9,5 L0.5,8.4 z')
+    p.setAttribute('fill', 'var(--graphite)')
+    m.appendChild(p)
+    svgDefs.appendChild(m)
+  })
+
   // A displacement filter that gives hard vector edges a slight tooth.
   const f = document.createElementNS(NS, 'filter')
   f.setAttribute('id', 'tooth')

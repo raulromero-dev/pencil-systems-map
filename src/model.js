@@ -70,7 +70,8 @@ export const NODES = [
 
   // ---- LEGACY --------------------------------------------------------------
   { id: 'l1', layer: 'legacy', tier: 3, label: 'German workshop schools' },
-  { id: 'l2', layer: 'legacy', tier: 1, label: 'Bauhaus and modern design pedagogy' },
+  { id: 'l2', layer: 'legacy', tier: 1, label: 'Bauhaus and modern design pedagogy',
+    sub: 'art, craft, and technology through making' },
   { id: 'l3', layer: 'legacy', tier: 2, label: '“Form follows function”' },
   { id: 'l4', layer: 'legacy', tier: 3, label: 'Swiss International Style' },
   { id: 'l5', layer: 'legacy', tier: 3, label: 'Modern minimalism' },
@@ -80,8 +81,30 @@ export const NODES = [
   { id: 'l9', layer: 'legacy', tier: 1, label: 'Human-centered design thinking' },
   { id: 'l10', layer: 'legacy', tier: 2, label: 'Contemporary design-engineering pedagogy' },
   { id: 'l11', layer: 'legacy', tier: 1, label: 'Iterative design in digital formats' },
-  { id: 'l12', layer: 'legacy', tier: 3, label: 'Sketch, prototype, critique, iteration: Harvard MDE' },
-  { id: 'l13', layer: 'legacy', tier: 2, label: 'Contemporary pencils: Figma, Miro, networked canvases' },
+  { id: 'l12', layer: 'legacy', tier: 3, label: 'Harvard MDE',
+    sub: 'sketch, prototype, critique and iteration remain central' },
+  { id: 'l13', layer: 'legacy', tier: 2, label: 'Contemporary pencils: Figma, Miro, networked canvases, stylus' },
+
+  // the break with classical rules, and what it opened
+  { id: 'l14', layer: 'legacy', tier: 2, label: 'Sketching as a break from rigid classical rules' },
+  { id: 'l15', layer: 'legacy', tier: 2, label: 'Experimentation' },
+  { id: 'l16', layer: 'legacy', tier: 3, label: 'Degas, Van Gogh, Seurat graphite studies' },
+  { id: 'l17', layer: 'legacy', tier: 3, label: 'Plein-air practice' },
+  { id: 'l18', layer: 'legacy', tier: 3, label: 'Impressionism and other visual movements' },
+
+  // the industrial line that runs into the Bauhaus
+  { id: 'l19', layer: 'legacy', tier: 3, label: 'Industrial Revolution' },
+  { id: 'l20', layer: 'legacy', tier: 3, label: 'Arts and Crafts Movement' },
+  { id: 'l21', layer: 'legacy', tier: 3, label: 'Art Nouveau, Jugendstil and reform schools' },
+  { id: 'l22', layer: 'legacy', tier: 3, label: 'Deutscher Werkbund' },
+  { id: 'l23', layer: 'legacy', tier: 3, label: 'Pre-WWI modernism and industrial architecture' },
+  { id: 'l24', layer: 'legacy', tier: 3, label: 'World War I, 1914–1918' },
+
+  // and the education that carried it forward
+  { id: 'l25', layer: 'legacy', tier: 2, label: '20th-century modern design education',
+    sub: 'studio-based professional design disciplines' },
+  { id: 'l26', layer: 'legacy', tier: 2, label: 'Late-20th and 21st-century design-engineering pedagogy',
+    sub: 'design, engineering, computation, and systems thinking' },
 ]
 
 export const NODE_BY_ID = Object.fromEntries(NODES.map(n => [n.id, n]))
@@ -149,6 +172,30 @@ export const LINKS = [
   { from: 'l9', to: 'l11', strength: 3 },
   { from: 'l5', to: 'l11', strength: 1 },
   { from: 'l11', to: 'l13', strength: 3 },
+
+  // the break with classical rules
+  { from: 'i3', to: 'l14', strength: 2 },
+  { from: 'l14', to: 'l15', strength: 3 },
+  { from: 'l15', to: 'l2', strength: 2 },
+  { from: 'l15', to: 'l17', strength: 2 },
+  { from: 'l17', to: 'l18', strength: 2 },
+  { from: 'l16', to: 'l18', strength: 1 },
+
+  // the industrial line into the Bauhaus
+  { from: 'l7', to: 'l19', strength: 2 },
+  { from: 'l19', to: 'l20', strength: 2 },
+  { from: 'l20', to: 'l21', strength: 2 },
+  { from: 'l21', to: 'l22', strength: 2 },
+  { from: 'l22', to: 'l23', strength: 2 },
+  { from: 'l23', to: 'l24', strength: 2 },
+  { from: 'l24', to: 'l2', strength: 2 },
+
+  // and the education that carried it forward
+  { from: 'l3', to: 'l25', strength: 2 },
+  { from: 'l5', to: 'l25', strength: 1 },
+  { from: 'l25', to: 'l26', strength: 3 },
+  { from: 'l9', to: 'l26', strength: 2 },
+  { from: 'l26', to: 'l12', strength: 2 },
 ]
 
 // Kept so the archived plates still run. The live views show everything.

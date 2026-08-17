@@ -128,6 +128,7 @@ h1 span { font-weight: 400; color: var(--graphite-3); }
 
 /* SVG idioms shared across directions */
 .t-key { font-weight: 600; }
+.t-sub  { font-family: var(--f); font-size: 11px; fill: var(--graphite-3); }
 .t-node { font-family: var(--f); font-size: 15px; fill: var(--graphite); letter-spacing: -.004em; }
 
 /* Labels sit over the strokes in places. Rather than a rectangle behind every
@@ -365,3 +366,37 @@ footer .right {
 .t-section { font-family: var(--f); font-size: 23px; font-weight: 600; fill: var(--graphite); letter-spacing: -.012em; }
 .t-note { font-family: var(--f); font-size: 13.5px; fill: var(--graphite-3); }
 .edge.cross { stroke: var(--graphite); }
+
+/* ---------------------------------------------------------------- /final-4
+   A poster: one very large display size against a lot of very small type,
+   with hairlines doing the ruling. The contrast between the two is the whole
+   effect, so nothing sits in the middle of the scale. */
+.p-display {
+  font-family: var(--f); font-size: 108px; font-weight: 700;
+  letter-spacing: -.045em; fill: var(--graphite);
+}
+.p-meta { font-family: var(--f); font-size: 12.5px; fill: var(--graphite-2); letter-spacing: .01em; }
+.p-sub  { font-family: var(--f); font-size: 30px; font-weight: 400; fill: var(--graphite); letter-spacing: -.018em; }
+.p-num  { font-family: var(--f); font-size: 26px; font-style: italic; fill: var(--graphite); }
+.p-title { font-family: var(--f); font-size: 26px; font-weight: 600; fill: var(--graphite); letter-spacing: -.012em; }
+.p-body { font-family: var(--f); font-size: 12.5px; fill: var(--graphite-2); }
+.p-section {
+  font-family: var(--f); font-size: 13px; font-weight: 600;
+  letter-spacing: .16em; fill: var(--graphite);
+}
+.p-node { font-family: var(--f); fill: var(--graphite-2); }
+.p-key  { fill: var(--graphite); font-weight: 500; }
+.p-lens {
+  font-family: var(--f); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .14em; fill: var(--graphite-3);
+}
+
+/* ---------------------------------------------------------------- /final-5
+   A schematic register: small letterspaced capitals, hairlines, dashed zones. */
+.q-title { font-family: var(--f); font-size: 19px; font-weight: 700; letter-spacing: .04em; fill: var(--graphite); }
+.q-sub   { font-family: var(--f); font-size: 12px; letter-spacing: .13em; fill: var(--graphite-2); }
+.q-zone  { font-family: var(--f); font-size: 12.5px; font-weight: 700; letter-spacing: .17em; fill: var(--graphite); }
+.q-meta  { font-family: var(--f); font-size: 10px; letter-spacing: .15em; fill: var(--graphite-3); }
+.q-rail  { font-family: var(--f); font-size: 10.5px; font-weight: 600; letter-spacing: .26em; fill: var(--graphite-3); }
+.q-node  { font-family: var(--f); font-size: 9.6px; letter-spacing: .07em; fill: var(--graphite-2); }
+.q-key   { font-weight: 700; fill: var(--graphite); letter-spacing: .08em; }

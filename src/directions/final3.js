@@ -44,11 +44,14 @@ const LH = 15.4
 // map turns on; a tier 3 node is a contributing detail.
 function measure(n) {
   const lines = wrap(n.label, 13)
-  const wide = Math.max(...lines.map(t => t.length)) * 7.9
-  const tall = lines.length * LH
+  const subs = n.sub ? wrap(n.sub, 17) : []
+  const wide = Math.max(
+    Math.max(...lines.map(t => t.length)) * 7.9,
+    subs.length ? Math.max(...subs.map(t => t.length)) * 5.6 : 0)
+  const tall = lines.length * LH + subs.length * 12.5 + (subs.length ? 9 : 0)
   const grow = n.tier === 1 ? 34 : n.tier === 2 ? 20 : 11
   const r = Math.max(40, Math.hypot(wide, tall) / 2 + grow)
-  return { lines, r, w: r * 2, h: r * 2 }
+  return { lines, subs, r, w: r * 2, h: r * 2 }
 }
 
 // and the ring thickens with it, so importance reads even where two circles
@@ -69,35 +72,44 @@ export function render(g, ctx) {
   const sections = []
 
   // ------------------------------------------------------- measure and place
+  // Not a grid. Each sub-system is seeded as a loose drift across the page and
+  // then settled, so the field reads as arranged by hand rather than tabulated.
+  // The bands are allowed to bleed into each other by design: the argument does
+  // not actually stop at a section boundary, and ruling one across the page said
+  // that it did.
   let y = INTRO
-  ORDER.forEach(id => {
+  const all = []
+  ORDER.forEach((id, si) => {
     const layer = LAYERS.find(l => l.id === id)
-    const list = NODES.filter(n => n.layer === id)          // everything, always
+    const list = NODES.filter(n => n.layer === id)
     const members = list.map(n => ({ n, ...measure(n) }))
-    const rows = Math.ceil(members.length / PER_ROW)
-    const rowH = []
-    for (let r = 0; r < rows; r++) {
-      rowH.push(Math.max(...members.slice(r * PER_ROW, (r + 1) * PER_ROW).map(m => m.h)))
-    }
-    const ROW_GAP = 76
-    const areaTop = y + 80
+    const band = 200 + Math.ceil(members.length / 3.1) * 176
+    const areaTop = y + 62
     const usable = VW - M * 2
-    let ry = areaTop
+
+    // a wandering seed: three loose columns that lean, rather than four square ones
     members.forEach((m, i) => {
-      const r = Math.floor(i / PER_ROW)
-      const c = i % PER_ROW
-      const inRow = Math.min(PER_ROW, members.length - r * PER_ROW)
-      const cell = usable / inRow
-      m.x = Math.round(M + cell * (c + 0.5))
-      m.y = Math.round(areaTop + rowH.slice(0, r).reduce((a, v) => a + v + ROW_GAP, 0) + rowH[r] / 2)
+      const t = members.length < 2 ? 0.5 : i / (members.length - 1)
+      const lane = i % 3
+      const drift = Math.sin(i * 1.7 + si * 2.3) * 0.16
+      m.x = M + usable * Math.min(0.94, Math.max(0.06, (0.16 + lane * 0.34) + drift))
+      m.y = areaTop + 70 + t * (band - 200) + Math.cos(i * 2.1 + si) * 46
+      m.homeY = m.y
+      m.minY = areaTop - 30
+      m.maxY = y + band + 30
+      m.keep = { x: M + 130, y: y + 34, w: 340, h: 108 }   // the section name
+      all.push(m)
       pos[m.n.id] = m
     })
-    const height = 80 + rowH.reduce((a, v) => a + v + ROW_GAP, 0) - ROW_GAP + 74
 
-    sections.push({ layer, members, top: y, height })
-    y += height
+    sections.push({ layer, members, top: y, height: band })
+    y += band
   })
-  const H = y + 72
+
+  // one settle over the whole page, so a section can lean into its neighbour
+  settle(all, M, VW - M)
+
+  const H = y + 210      // clear air under the last circle, before the footer
 
   // the page is as tall as it needs to be, and scrolls
   svg.setAttribute('viewBox', `0 0 ${VW} ${H}`)
@@ -116,12 +128,10 @@ export function render(g, ctx) {
   g.appendChild(tip)
 
   // ------------------------------------------------------------- the sections
-  sections.forEach(({ layer, top }, i) => {
+  sections.forEach(({ layer, top }) => {
     const sec = s('g')
     g.appendChild(sec)
-    sec.appendChild(s('line', { x1: M, y1: top, x2: VW - M, y2: top,
-      stroke: 'var(--graphite)', 'stroke-width': i === 0 ? 1.2 : 0.9, opacity: INK * 0.8 }))
-    sec.appendChild(s('text', { x: M, y: top + 40, class: 't-section', text: layer.name }))
+    sec.appendChild(s('text', { x: M, y: top + 46, class: 't-section', text: layer.name }))
   })
 
   // ------------------------------------------------------------- the edges
@@ -132,7 +142,7 @@ export function render(g, ctx) {
     const a = pos[l.from], b = pos[l.to]
     if (!a || !b) return
     const [x1, y1] = edgeOf(a, b.x, b.y)
-    const [x2, y2] = edgeOf(b, a.x, a.y)
+    const [x2, y2] = edgeOf(b, a.x, a.y, 13)   // room for the head
     const dx = b.x - a.x, dy = b.y - a.y
     const cross = a.n.layer !== b.n.layer
     // Same easing as the fan view: control points held on the dominant axis so
@@ -144,13 +154,14 @@ export function render(g, ctx) {
       : `M${x1.toFixed(1)},${y1.toFixed(1)} C${((x1 + x2) / 2).toFixed(1)},${y1.toFixed(1)} ` +
         `${((x1 + x2) / 2).toFixed(1)},${y2.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`
     const sw = l.strength || 2
-    const weight = [0, 0.9, 1.55, 2.5][sw]
-    const alpha = [0, 0.32, 0.5, 0.74][sw]
+    const weight = [0, 1.35, 2.1, 3.1][sw]
+    const alpha = [0, 0.4, 0.58, 0.8][sw]
     eg.appendChild(s('path', {
       class: 'edge' + (cross ? ' cross' : ''),
       d: d2,
-      'stroke-width': ((cross ? weight * 1.12 : weight) * W).toFixed(2),
+      'stroke-width': ((cross ? weight * 1.5 : weight) * W).toFixed(2),
       opacity: INK * (cross ? Math.min(0.88, alpha + 0.1) : alpha),
+      'marker-end': `url(#arw${sw})`,
     }))
   })
 
@@ -166,9 +177,7 @@ export function render(g, ctx) {
   // -------------------------------------------------------------- the nodes
   sections.forEach(({ members }) => members.forEach(m => {
     const grp = s('g', { class: 'node' })
-    // barely there: enough to hold the words off a line passing behind, not
-    // enough to punch a hole in the sheet
-    grp.appendChild(s('circle', { cx: m.x, cy: m.y, r: m.r, fill: 'var(--paper)', opacity: 0.42 }))
+    grp.appendChild(s('circle', { cx: m.x, cy: m.y, r: m.r, fill: 'var(--paper)', opacity: 0.97 }))
     grp.appendChild(s('circle', { class: 'nodering', cx: m.x, cy: m.y, r: m.r, fill: 'none',
       stroke: 'var(--graphite)',
       'stroke-width': ring(m.n.tier), opacity: INK * 0.92 }))
@@ -187,4 +196,38 @@ export const meta = {
   viewBox: `0 0 ${VW} 2000`,
   scrolls: true,
   caption: 'The same page drawn with circles, for comparison with the card version.',
+}
+
+// Push circles apart, hold each loosely to the height it was seeded at, and
+// keep everything on the page. Sections are free to interleave at their edges.
+function settle(ms, minX, maxX, rounds = 420) {
+  for (let k = 0; k < rounds; k++) {
+    for (let i = 0; i < ms.length; i++) {
+      for (let j = i + 1; j < ms.length; j++) {
+        const a = ms[i], b = ms[j]
+        const dx = b.x - a.x, dy = b.y - a.y
+        const d = Math.hypot(dx, dy) || 0.01
+        const need = a.r + b.r + 30
+        if (d >= need) continue
+        const p = (need - d) / 2, ux = dx / d, uy = dy / d
+        a.x -= ux * p; a.y -= uy * p
+        b.x += ux * p; b.y += uy * p
+      }
+    }
+    for (const m of ms) {
+      // off the section name
+      if (m.keep) {
+        const dx = m.x - m.keep.x, dy = m.y - m.keep.y
+        const ox = m.r + m.keep.w / 2 - Math.abs(dx)
+        const oy = m.r + m.keep.h / 2 - Math.abs(dy)
+        if (ox > 0 && oy > 0) {
+          if (oy <= ox * 0.6) m.y += (dy <= 0 ? -1 : 1) * (oy * 0.6 + 0.5)
+          else m.x += (dx <= 0 ? -1 : 1) * (ox * 0.6 + 0.5)
+        }
+      }
+      m.y += (m.homeY - m.y) * 0.035
+      m.x = Math.max(minX + m.r, Math.min(maxX - m.r, m.x))
+      m.y = Math.max(m.minY + m.r * 0.3, Math.min(m.maxY - m.r * 0.3, m.y))
+    }
+  }
 }

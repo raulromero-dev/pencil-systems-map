@@ -18,6 +18,8 @@ routes below onto `index.html`; on Vercel the same job is done by the rewrite in
 | `/final-3` | circles, sized by how central a node is (**the preferred view**) |
 | `/final-2` | the same map drawn as cards |
 | `/map-2` | one continuous stroke, the sub-systems as stretches of a single mark |
+| `/final-4` | a poster: four circles as a rosette around the instrument |
+| `/final-5` | a process plate: dashed zones, orthogonal routing, attribute rails |
 
 ## The sheet
 
@@ -75,11 +77,11 @@ src/
   chrome.js             masthead and ground switch
   main.js               orchestration and routing
   directions/
-    final3.js  final2.js  map2.js
+    final3.js  final2.js  map2.js  final4.js  final5.js
 ```
 
-`model.js` holds four `LAYERS`, the `NODES` tagged by layer and tier, and the
-`LINKS` tagged by strength. Adding a view means writing one module that exports
+`model.js` holds four `LAYERS`, the `NODES` tagged by layer and tier (with an
+optional `sub` for a secondary line), and the `LINKS` tagged by strength. Adding a view means writing one module that exports
 `render(g, ctx)` and `meta`, then registering it in `main.js`.
 
 ## The pencil
