@@ -163,11 +163,11 @@ export function render(g, ctx) {
       const lx = turnIn.at + inward * 150
       const ly = (turnIn.y1 + turnIn.y2) / 2
       marks.push({ layer, x: lx, y: ly, anchor: inward > 0 ? 'start' : 'end', i: sg.i,
-        cx: lx + inward * 128, cy: ly - 6, w: 296, h: 132, fixed: true })
+        cx: lx + inward * 128, cy: ly - 4, w: 296, h: 82, fixed: true })
     } else {
       const hx = TIP[0] + 20
       marks.push({ layer, x: hx, y: TIP[1] - 38, anchor: 'start', i: sg.i, head: true,
-        cx: hx + 128, cy: TIP[1] - 42, w: 296, h: 126, fixed: true })
+        cx: hx + 128, cy: TIP[1] - 34, w: 296, h: 78, fixed: true })
     }
   })
 
@@ -176,12 +176,8 @@ export function render(g, ctx) {
   // names first, so a node never prints over one
   marks.forEach(mk => {
     const lab = s('g')
-    lab.appendChild(s('text', { x: mk.x, y: mk.y - 26, class: 't-num',
-      'text-anchor': mk.anchor, text: `0${mk.i + 1}` }))
     lab.appendChild(s('text', { x: mk.x, y: mk.y, class: 't-section',
       'text-anchor': mk.anchor, text: mk.layer.name }))
-    lab.appendChild(s('text', { x: mk.x, y: mk.y + 24, class: 't-micro',
-      'text-anchor': mk.anchor, text: mk.layer.role }))
     g.appendChild(lab)
   })
 

@@ -80,7 +80,7 @@ export function render(g, ctx) {
       rowH.push(Math.max(...members.slice(r * PER_ROW, (r + 1) * PER_ROW).map(m => m.h)))
     }
     const ROW_GAP = 76
-    const areaTop = y + 132
+    const areaTop = y + 80
     const usable = VW - M * 2
     let ry = areaTop
     members.forEach((m, i) => {
@@ -92,7 +92,7 @@ export function render(g, ctx) {
       m.y = Math.round(areaTop + rowH.slice(0, r).reduce((a, v) => a + v + ROW_GAP, 0) + rowH[r] / 2)
       pos[m.n.id] = m
     })
-    const height = 132 + rowH.reduce((a, v) => a + v + ROW_GAP, 0) - ROW_GAP + 74
+    const height = 80 + rowH.reduce((a, v) => a + v + ROW_GAP, 0) - ROW_GAP + 74
 
     sections.push({ layer, members, top: y, height })
     y += height
@@ -122,10 +122,6 @@ export function render(g, ctx) {
     sec.appendChild(s('line', { x1: M, y1: top, x2: VW - M, y2: top,
       stroke: 'var(--graphite)', 'stroke-width': i === 0 ? 1.2 : 0.9, opacity: INK * 0.8 }))
     sec.appendChild(s('text', { x: M, y: top + 40, class: 't-section', text: layer.name }))
-    sec.appendChild(s('text', { x: M, y: top + 66, class: 't-micro', text: layer.role }))
-    sec.appendChild(s('text', { x: VW - M, y: top + 40, class: 't-num', 'text-anchor': 'end',
-      text: `0${i + 1}` }))
-    sec.appendChild(s('text', { x: M, y: top + 92, class: 't-note', text: layer.note }))
   })
 
   // ------------------------------------------------------------- the edges
