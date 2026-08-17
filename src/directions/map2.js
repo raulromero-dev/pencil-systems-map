@@ -34,19 +34,15 @@ const W = 1.2
 const VW = 1600
 const M = 168                      // margin: the turns bulge into it
 const INTRO = 300
-const SLOPE = 236                  // each sweep descends as it crosses
+const SLOPE_BASE = 150             // each sweep descends as it crosses,
+const SLOPE_PER = 26               // by this much more for every node it holds
 const TURN_DROP = 250              // so the turn only has this much to cover
 const BULGE = 128                  // which lets it round properly
-
-export const GRADE_TRACK = { x0: 0, x1: 0, y: 0 }   // this view has no grade
 
 export function render(g, ctx) {
   const { state, svg } = ctx
   const measure = s('path', { fill: 'none', stroke: 'none' })
   svg.appendChild(measure)
-
-  const H = INTRO + ORDER.length * SLOPE + (ORDER.length - 1) * TURN_DROP + 360
-  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`)
 
   // ------------------------------------------------------------- the point
   const PW = 620
@@ -73,6 +69,10 @@ export function render(g, ctx) {
   ORDER.forEach((id, i) => {
     const toRight = i % 2 === 0
     const xe = toRight ? R_X : L_X
+    const count = NODES.filter(n => n.layer === id).length
+    // the first stretch runs from the point, so it is only half a page wide and
+    // needs the extra drop more than the others do
+    const SLOPE = SLOPE_BASE + count * SLOPE_PER + (i === 0 ? 210 : 0)
     const ya = cy, yb = cy + SLOPE
     const dx = xe - cx
     segs.push({ kind: 'sweep', layer: id, i, toRight, xs: cx, xe, ya, yb, y: (ya + yb) / 2,
@@ -90,6 +90,10 @@ export function render(g, ctx) {
       cy = y2
     }
   })
+
+  // the page is as tall as the line turned out to be
+  const H = cy + 300
+  svg.setAttribute('viewBox', `0 0 ${VW} ${H}`)
 
   // measure each segment so the whole line can be addressed by length
   let total = 0
@@ -146,8 +150,8 @@ export function render(g, ctx) {
         // the words hang below the tick or sit above it, so the box to keep
         // clear is offset from the tick by this much
         off: (sg.i === 0 ? 1 : (j % 2 === 0 ? -1 : 1)) < 0 ? -19 : 19,
-        minY: sg.i === 0 ? sg.ya + 26 : sg.ya - 232,
-        maxY: sg.yb + 232,
+        minY: sg.i === 0 ? sg.ya + 26 : sg.ya - 210,
+        maxY: sg.yb + 210,
       })
     })
 
@@ -182,17 +186,19 @@ export function render(g, ctx) {
   })
 
   all.forEach(pl => {
-    const hot = state.active === pl.n.id || state.pinned === pl.n.id
-    const ng = s('g', { class: 'node' + (hot ? ' hot' : ''), 'data-node': pl.n.id })
+    const t1 = pl.n.tier === 1
+    const ng = s('g', { class: 'node' })
     ng.appendChild(s('line', { x1: pl.px, y1: pl.py, x2: pl.tx, y2: pl.ty,
-      stroke: hot ? 'var(--accent)' : 'var(--graphite)',
-      'stroke-width': 1.05 * W, opacity: INK * 0.8 }))
-    ng.appendChild(s('circle', { cx: pl.tx, cy: pl.ty, r: 4.5, fill: 'var(--paper)',
-      stroke: hot ? 'var(--accent)' : 'var(--graphite)', 'stroke-width': 1.3 }))
+      stroke: 'var(--graphite)',
+      'stroke-width': (t1 ? 1.3 : 1.0) * W, opacity: INK * (t1 ? 0.9 : 0.72) }))
+    // the tick grows with how central the node is, the same encoding the other
+    // views carry in the size of the circle
+    ng.appendChild(s('circle', { cx: pl.tx, cy: pl.ty,
+      r: t1 ? 6.4 : pl.n.tier === 2 ? 4.6 : 3.4, fill: 'var(--paper)',
+      stroke: 'var(--graphite)', 'stroke-width': t1 ? 1.7 : 1.25 }))
     const top0 = pl.ty - (pl.lines - 1) * 8 + (pl.up < 0 ? -15 : 23)
-    ng.appendChild(label(pl.n.label, pl.tx, top0, { maxChars: 17, lh: 16, anchor: 'middle' }).el)
-    ng.appendChild(s('rect', { class: 'hit', x: pl.tx - 94, y: top0 - 17,
-      width: 188, height: pl.lines * 16 + 26 }))
+    ng.appendChild(label(pl.n.label, pl.tx, top0,
+      { maxChars: 17, lh: 16, anchor: 'middle', cls: t1 ? 't-label t-key' : 't-label' }).el)
     pos[pl.n.id] = { x: pl.tx, y: pl.ty }
     g.appendChild(ng)
   })
@@ -208,9 +214,12 @@ export function render(g, ctx) {
     const d = Math.abs(dy) > Math.abs(dx)
       ? `M${a.x},${a.y} C${a.x},${((a.y + b.y) / 2).toFixed(1)} ${b.x},${((a.y + b.y) / 2).toFixed(1)} ${b.x},${b.y}`
       : `M${a.x},${a.y} C${((a.x + b.x) / 2).toFixed(1)},${a.y} ${((a.x + b.x) / 2).toFixed(1)},${b.y} ${b.x},${b.y}`
+    const sw = l.strength || 2
+    const weight = [0, 0.8, 1.35, 2.1][sw]
+    const alpha = [0, 0.28, 0.44, 0.62][sw]
     eg.appendChild(s('path', { class: 'edge' + (cross ? ' cross' : ''), d,
-      'stroke-width': ((cross ? 1.3 : 0.95) * W).toFixed(2),
-      opacity: INK * (cross ? 0.55 : 0.36) }))
+      'stroke-width': ((cross ? weight * 1.12 : weight) * W).toFixed(2),
+      opacity: INK * (cross ? Math.min(0.8, alpha + 0.1) : alpha) }))
   })
 
   measure.remove()

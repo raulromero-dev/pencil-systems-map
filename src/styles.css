@@ -127,35 +127,21 @@ h1 span { font-weight: 400; color: var(--graphite-3); }
 :root[data-mode="graphite"] .pencil-photo { filter: brightness(.92) saturate(.92); }
 
 /* SVG idioms shared across directions */
+.t-key { font-weight: 600; }
 .t-node { font-family: var(--f); font-size: 15px; fill: var(--graphite); letter-spacing: -.004em; }
-.node:hover .nodering { stroke: var(--accent); }
 
 /* Labels sit over the strokes in places. Rather than a rectangle behind every
    one, the text paints a paper-coloured outline of itself first and its own
    fill on top: the backing hugs the letterforms, so it is invisible on bare
    paper and only shows where a glyph actually crosses graphite. */
-.t-label, .t-layer, .t-micro, .t-num, .t-node, .t-closed, .t-section, .t-note {
-  paint-order: stroke fill;
-  stroke: var(--paper);
-  stroke-width: 3.4px;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-.t-label { font-family: var(--f); font-size: 15px; fill: var(--graphite); letter-spacing: -.005em; }
+.t-label, .t-layer, .t-micro, .t-num, .t-node, .t-label { font-family: var(--f); font-size: 15px; fill: var(--graphite); letter-spacing: -.005em; }
 .t-micro { font-family: var(--f); font-size: 12.5px; fill: var(--graphite-3); }
 .t-layer { font-family: var(--f); font-size: 15.5px; font-weight: 600; letter-spacing: -.005em; fill: var(--graphite); }
 .t-role  { font-family: var(--f); font-size: 17.5px; font-weight: 500; fill: var(--graphite); letter-spacing: -.01em; }
 .t-num   { font-family: var(--f); font-size: 12px; fill: var(--graphite-3); font-variant-numeric: tabular-nums; }
 
-.node { cursor: pointer; }
-.node .hit { fill: transparent; }
-.node.dim { opacity: .16; }
-.node.hot .t-label { font-weight: 600; }
+/* nothing on the plate is clickable: the map is the whole statement */
 /* hover emphasis is CSS only, so sweeping the plate never triggers a redraw */
-.node:not(.dim):hover .t-label { font-weight: 600; fill: var(--graphite); }
-.node:not(.dim):hover line { stroke: var(--accent); }
-.node .tooth { fill: var(--graphite); opacity: 0; }
-.node.hot .tooth { opacity: .05; }
 .constructor { stroke: var(--rule); stroke-width: .5; fill: none; }
 .constructor-txt { font-family: var(--f); font-size: 10.5px; fill: var(--rule-2); }
 
@@ -166,64 +152,9 @@ h1 span { font-weight: 400; color: var(--graphite-3); }
 
 /* ---------------------------------------------------------------- drawer */
 
-.drawer {
-  position: absolute; top: 0; right: 0; bottom: 0; width: var(--drawer);
-  background: var(--paper);
-  border-left: 1px solid var(--graphite);
-  padding: 26px;
-  transform: translateX(100%);
-  transition: transform .34s var(--ease);
-  z-index: 5;
-  overflow-y: auto;
-}
-.drawer.open { transform: none; }
 /* the tooth carries into the zoomed-in view, so a factor reads as being
    examined on the same sheet rather than in a separate window */
-.drawer::before {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background-image: var(--paper-tex); background-size: 220px 220px;
-  opacity: .6; mix-blend-mode: multiply;
-}
-:root[data-mode="graphite"] .drawer::before { opacity: .32; mix-blend-mode: screen; }
-.drawer > * { position: relative; z-index: 1; }
-.drawer .note { display: flex; flex-direction: column; gap: 16px; }
-.drawer .close {
-  all: unset;
-  position: absolute; top: 18px; right: 20px; z-index: 2;
-  display: grid; place-items: center;
-  width: 34px; height: 34px;
-  color: var(--graphite-3);
-  transition: color .16s var(--ease), transform .18s var(--ease);
-}
-.drawer .close:hover { color: var(--graphite); transform: rotate(-9deg) scale(.93); }
-.drawer .close:active { transform: rotate(-9deg) scale(.86); }
-.drawer .close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.drawer .close svg { display: block; }
-
-/* Scrapping the sheet.
-   Two things were wrong before: the note animated while the panel also slid
-   out, so two exits ran at once; and a rectangle scaling down never reads as
-   paper. Now the whole panel IS the sheet, its slide is suppressed, and its
-   silhouette is deformed by an animated clip-path with a fixed number of
-   points, so the edges buckle and fold inward the way a crumpling page does.
-   A crease overlay fades in over the middle of the motion. */
-@keyframes scrap-toss {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1) rotate(0deg); opacity: 1;
-    animation-timing-function: cubic-bezier(.3, 0, .24, 1);
-  }
-  28% {
-    transform: translate3d(5px, 5px, 0) scale(.95) rotate(-1.8deg); opacity: 1;
-    animation-timing-function: cubic-bezier(.32, 0, .3, 1);
-  }
-  58% {
-    transform: translate3d(26px, -10px, 0) scale(.58) rotate(7deg); opacity: .94;
-    animation-timing-function: cubic-bezier(.52, 0, .86, .36);
-  }
-  100% {
-    transform: translate3d(150px, -84px, 0) scale(.14) rotate(26deg); opacity: 0;
-  }
-}
+:root[data-mode="graphite"] 
 
 @keyframes scrap-shape {
   0% {
@@ -250,34 +181,7 @@ h1 span { font-weight: 400; color: var(--graphite-3); }
   100% { opacity: 0; }
 }
 
-.drawer.scrapping {
-  transition: none;                 /* the slide must not run alongside this */
-  animation: scrap-toss .62s forwards, scrap-shape .62s forwards;
-  transform-origin: 86% 6%;
-  will-change: transform, opacity, clip-path;
-  backface-visibility: hidden;
-}
-.drawer.scrapping::after {
-  content: ""; position: absolute; inset: -10%; z-index: 3; pointer-events: none;
-  /* individual folds at irregular angles and offsets. Evenly repeated stripes
-     read as hatching; creases are never evenly spaced. */
-  background:
-    linear-gradient(57deg,  transparent 27.6%, rgba(0,0,0,.22) 28%, transparent 28.5%),
-    linear-gradient(-34deg, transparent 45.6%, rgba(0,0,0,.19) 46%, transparent 46.6%),
-    linear-gradient(71deg,  transparent 61.8%, rgba(0,0,0,.17) 62.2%, transparent 62.8%),
-    linear-gradient(-16deg, transparent 70.8%, rgba(0,0,0,.15) 71.2%, transparent 71.7%),
-    linear-gradient(38deg,  transparent 14.7%, rgba(0,0,0,.14) 15.1%, transparent 15.7%),
-    linear-gradient(-62deg, transparent 55.8%, rgba(0,0,0,.12) 56.1%, transparent 56.6%),
-    radial-gradient(70% 55% at 26% 24%, rgba(0,0,0,.09), transparent 72%),
-    radial-gradient(60% 50% at 74% 68%, rgba(0,0,0,.07), transparent 70%);
-  mix-blend-mode: multiply;
-  animation: scrap-creases .62s ease-out forwards;
-}
-:root[data-mode="graphite"] .drawer.scrapping::after { mix-blend-mode: screen; }
-.drawer .eyebrow { font-family: var(--f); font-size: 12px; color: var(--graphite-3); }
-.drawer h3 { margin: 0; padding-right: 52px; font-size: 23px; font-weight: 500; line-height: 1.14; letter-spacing: -.018em; text-wrap: balance; }
-.drawer p { margin: 0; font-size: 14.5px; line-height: 1.58; color: var(--graphite-2); }
-
+:root[data-mode="graphite"] 
 /* ---------------------------------------------------------------- footer */
 
 /* notation legend, sitting as marginalia along the bottom rule */
@@ -452,31 +356,8 @@ footer .right {
 .dial { cursor: ew-resize; }
 
 /* section heading inside the panel (lost when the old rail styles went) */
-.drawer .block { display: flex; flex-direction: column; gap: 12px; }
-.drawer .block > h2 {
-  margin: 0;
-  font-family: var(--f); font-size: 11.5px; font-weight: 400;
-  color: var(--graphite-3);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--rule);
-}
-
-/* a cut-out of the map inside the panel, rather than a list of link names */
-.minimap { display: block; max-width: 100%; height: auto; overflow: visible; }
-.minimap .link { stroke-linecap: round; }
-.mm-label { font-family: var(--f); font-size: 12.5px; fill: var(--graphite-2); }
-.mm-self { fill: var(--graphite); font-weight: 600; }
-.mm-row { cursor: pointer; }
-.mm-row:hover .mm-label { fill: var(--graphite); }
-.mm-row:hover .edge { stroke: var(--graphite); }
-.mm-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* /final-2: the closed sub-systems are the way in */
-.t-closed { font-family: var(--f); font-size: 15px; font-weight: 600; fill: var(--graphite); }
-.subsys[data-focus] { cursor: pointer; }
-.subsys[data-focus]:hover .ring { stroke: var(--accent); }
-.subsys[data-focus]:hover .t-closed { fill: var(--accent); }
-.subsys[data-focus]:focus-visible .ring { stroke: var(--accent); stroke-width: 2; }
 
 /* a view that runs below the fold */
 #app[data-scroll="1"] .stage { overflow-y: auto; overflow-x: hidden; }

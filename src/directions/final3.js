@@ -37,16 +37,23 @@ const M = 64                       // side margin
 const INTRO = 300                  // room for the instrument at the head
 const PER_ROW = 4
 
-export const GRADE_TRACK = { x0: 0, x1: 0, y: 0 }   // unused here
-
 const LH = 15.4
+
+// Size is the first encoding: a circle grows with how central its node is to
+// the argument, on top of the room its words need. A tier 1 node is a claim the
+// map turns on; a tier 3 node is a contributing detail.
 function measure(n) {
   const lines = wrap(n.label, 13)
   const wide = Math.max(...lines.map(t => t.length)) * 7.9
   const tall = lines.length * LH
-  const r = Math.max(44, Math.hypot(wide, tall) / 2 + 16)
+  const grow = n.tier === 1 ? 34 : n.tier === 2 ? 20 : 11
+  const r = Math.max(40, Math.hypot(wide, tall) / 2 + grow)
   return { lines, r, w: r * 2, h: r * 2 }
 }
+
+// and the ring thickens with it, so importance reads even where two circles
+// happen to hold labels of similar length
+const ring = tier => (tier === 1 ? 1.55 : tier === 2 ? 1.15 : 0.85)
 
 // Where a line should meet a card: the point on its border along the bearing
 // to the other end, so every edge stops cleanly at the box.
@@ -140,11 +147,14 @@ export function render(g, ctx) {
         `${x2.toFixed(1)},${((y1 + y2) / 2).toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`
       : `M${x1.toFixed(1)},${y1.toFixed(1)} C${((x1 + x2) / 2).toFixed(1)},${y1.toFixed(1)} ` +
         `${((x1 + x2) / 2).toFixed(1)},${y2.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`
+    const sw = l.strength || 2
+    const weight = [0, 0.9, 1.55, 2.5][sw]
+    const alpha = [0, 0.32, 0.5, 0.74][sw]
     eg.appendChild(s('path', {
       class: 'edge' + (cross ? ' cross' : ''),
       d: d2,
-      'stroke-width': ((cross ? 1.45 : 1.1) * W).toFixed(2),
-      opacity: INK * (cross ? 0.7 : 0.48),
+      'stroke-width': ((cross ? weight * 1.12 : weight) * W).toFixed(2),
+      opacity: INK * (cross ? Math.min(0.88, alpha + 0.1) : alpha),
     }))
   })
 
@@ -159,14 +169,13 @@ export function render(g, ctx) {
 
   // -------------------------------------------------------------- the nodes
   sections.forEach(({ members }) => members.forEach(m => {
-    const hot = state.active === m.n.id || state.pinned === m.n.id
-    const grp = s('g', { class: 'node' + (hot ? ' hot' : ''), 'data-node': m.n.id })
+    const grp = s('g', { class: 'node' })
     // barely there: enough to hold the words off a line passing behind, not
     // enough to punch a hole in the sheet
     grp.appendChild(s('circle', { cx: m.x, cy: m.y, r: m.r, fill: 'var(--paper)', opacity: 0.42 }))
     grp.appendChild(s('circle', { class: 'nodering', cx: m.x, cy: m.y, r: m.r, fill: 'none',
-      stroke: hot ? 'var(--accent)' : 'var(--graphite)',
-      'stroke-width': hot ? 1.9 : 1.05, opacity: hot ? 1 : INK * 0.92 }))
+      stroke: 'var(--graphite)',
+      'stroke-width': ring(m.n.tier), opacity: INK * 0.92 }))
     const y0 = m.y - (m.lines.length - 1) * (LH / 2) + 5.5
     const t = s('text', { class: 't-node', 'text-anchor': 'middle', x: m.x, y: y0 })
     m.lines.forEach((ln, i) => t.appendChild(s('tspan', { x: m.x, y: y0 + i * LH, text: ln })))
