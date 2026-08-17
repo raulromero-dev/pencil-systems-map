@@ -200,7 +200,7 @@ export function gradeSpec(i) {
 export const DIRECTIONS = [
   { id: 'final3',  label: 'Final 3', caption: '' },
   { id: 'map2',    label: 'Map 2',   caption: '' },
-  { id: 'final2',  label: 'Final 2', caption: 'Every node at full size, with its connections inside each section and across them.' },
+  { id: 'final2',  label: 'Final 2', caption: '' },
   { id: 'stroke',  label: 'Stroke',  caption: 'Tonal build-up. Each sub-system is one pass of the hand.' },
   { id: 'descend', label: 'Final',   caption: '' },
   { id: 'section', label: 'Section', caption: 'Exploded assembly. The instrument opened on two axes.' },

@@ -120,9 +120,6 @@ export function render(g, ctx) {
       text: `0${i + 1}` }))
     sec.appendChild(s('text', { x: M, y: top + 92, class: 't-note', text: layer.note }))
   })
-  g.appendChild(s('line', { x1: M, y1: sections.at(-1).top + sections.at(-1).height,
-    x2: VW - M, y2: sections.at(-1).top + sections.at(-1).height,
-    stroke: 'var(--graphite)', 'stroke-width': 0.9, opacity: INK * 0.8 }))
 
   // ------------------------------------------------------------- the edges
   // Inside a section and across sections alike: same line, same meaning.
